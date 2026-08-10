@@ -12,7 +12,7 @@ Desktop app for browsing, downloading, loading, and chatting with [GenieX](https
 > (example: `NeuronVS/GenieX-UI`). The link always points at the **latest release** —  
 > you do **not** need to edit the README when you ship a new version.
 
-[![Download Windows ARM64](https://img.shields.io/github/v/release/OWNER/REPO?label=Download%20Windows%20ARM64&style=for-the-badge)](https://github.com/OWNER/REPO/releases/latest/download/GenieX-Model-Manager-Setup-arm64.exe)
+[![Download Windows ARM64](https://img.shields.io/github/v/release/OWNER/REPO?label=Download%20Windows%20ARM64&style=for-the-badge)](https://github.com/NeuronVS/GenieX-UI/releases/latest/download/GenieX-Model-Manager-Setup-arm64.exe)
 
 Or open the [latest release](https://github.com/OWNER/REPO/releases/latest) page.
 
