@@ -36,8 +36,10 @@ jobs:
         env:
           # Unsigned local/CI builds — skip code-sign discovery noise
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-          # electron-builder publishes the GitHub Release when CI is detected
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Built-in Actions token (do not create a secret named GITHUB_TOKEN)
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          # electron-builder also checks GH_TOKEN
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
