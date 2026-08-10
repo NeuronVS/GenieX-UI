@@ -1,6 +1,9 @@
 # Build a Windows ARM64 NSIS installer and attach it to a GitHub Release.
 # Trigger: push a version tag (v0.1.0) or run manually from the Actions tab.
 #
+# Manual runs → Actions Artifacts only
+# Tag runs    → GitHub Release + downloadable installer
+#
 # README download link stays valid forever via:
 #   https://github.com/<owner>/<repo>/releases/latest/download/GenieX-Model-Manager-Setup-arm64.exe
 
@@ -32,14 +35,10 @@ jobs:
         run: npm ci
 
       - name: Build installer
-        run: npm run package
+        run: npm run package -- --publish never
         env:
           # Unsigned local/CI builds — skip code-sign discovery noise
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-          # Built-in Actions token (do not create a secret named GITHUB_TOKEN)
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          # electron-builder also checks GH_TOKEN
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -47,3 +46,13 @@ jobs:
           name: geniex-model-manager-windows-arm64
           path: release/GenieX-Model-Manager-Setup-arm64.exe
           if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/GenieX-Model-Manager-Setup-arm64.exe
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -7,9 +7,6 @@ files:
   - dist/**/*
   - dist-electron/**/*
   - package.json
-publish:
-  provider: github
-  releaseType: release
 win:
   target:
     - target: nsis
