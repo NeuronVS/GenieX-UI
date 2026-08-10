@@ -32,12 +32,12 @@ jobs:
         run: npm ci
 
       - name: Build installer
-        # --publish never: release upload is handled by softprops/action-gh-release below.
-        # Without this, electron-builder sees CI and fails looking for GH_TOKEN.
         run: npm run package
         env:
           # Unsigned local/CI builds — skip code-sign discovery noise
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          # electron-builder publishes the GitHub Release when CI is detected
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -45,13 +45,3 @@ jobs:
           name: geniex-model-manager-windows-arm64
           path: release/GenieX-Model-Manager-Setup-arm64.exe
           if-no-files-found: error
-
-      - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: release/GenieX-Model-Manager-Setup-arm64.exe
-          generate_release_notes: true
-          fail_on_unmatched_files: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

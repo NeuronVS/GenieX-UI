@@ -10,7 +10,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "package": "npm run build && electron-builder --publish never"
+    "package": "npm run build && electron-builder"
   },
   "dependencies": {
     "check-disk-space": "^3.4.0",
