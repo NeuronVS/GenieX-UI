@@ -1,0 +1,29 @@
+appId: com.qualcomm.geniex.modelmanager
+productName: GenieX Model Manager
+copyright: Copyright © 2026
+directories:
+  output: release
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+win:
+  target:
+    - target: nsis
+      arch:
+        - arm64
+  # Stable name so README can always link:
+  # …/releases/latest/download/GenieX-Model-Manager-Setup-arm64.exe
+  artifactName: GenieX-Model-Manager-Setup-arm64.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: GenieX Model Manager
+  installerLanguages:
+    - en_US
+  displayLanguageSelector: false
+  deleteAppDataOnUninstall: false

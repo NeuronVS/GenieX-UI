@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist-electron/
+release/
+.tsc-out/
+*.tsbuildinfo
+*.log
+.DS_Store
