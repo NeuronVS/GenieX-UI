@@ -1,4 +1,4 @@
-# GenieX Model Manager
+# Qualcomm GenieX Model Manager
 
 Desktop app for browsing, downloading, loading, and chatting with [GenieX](https://aihub.qualcomm.com/geniex) models on Qualcomm Snapdragon Windows PCs. Optional [OpenCode](https://github.com/anomalyco/opencode) coding UI is embedded for local agent workflows.
 
