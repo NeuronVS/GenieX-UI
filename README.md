@@ -93,6 +93,22 @@ Creators, developers, and small teams on **Snapdragon Windows** (X Elite / X2 El
 
 ---
 
+
+**Version 0.1.0**
+
+<img width="1568" height="937" alt="Image" src="https://github.com/user-attachments/assets/9aa21aaf-b906-4784-9be0-d13404b982b7" />
+
+**Version 0.2.0** 
+
+<img width="1516" height="947" alt="Image" src="https://github.com/user-attachments/assets/83057da2-3439-45b9-a9c8-68a01b27a06f" />
+
+<img width="1529" height="949" alt="Image" src="https://github.com/user-attachments/assets/dd8a011f-758b-4ed0-9e0e-e9186d567b1f" />
+
+<img width="1529" height="956" alt="Image" src="https://github.com/user-attachments/assets/36161479-5905-42c6-bfd6-27aa1d2ef775" />
+
+<img width="1511" height="947" alt="Image" src="https://github.com/user-attachments/assets/1cf57c48-530b-4711-bb9b-7d73074c1a35" />
+
+
 ## Need the technical guide?
 
 Install steps, build commands, and live-server notes live in [`commands.md`](commands.md).
