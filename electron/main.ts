@@ -5,6 +5,10 @@ import { unloadModel } from './services/inferenceRuntime';
 import { startSystemMetrics, stopSystemMetrics } from './services/systemMetrics';
 import { stopOpenCode, refreshOpenCodeInstallState } from './services/opencodeRuntime';
 import { destroyOpenCodeView } from './services/opencodeView';
+import { fetchAppsCatalog } from './services/appCatalog';
+import { startCoreApiServer, stopCoreApiServer } from './services/coreApiServer';
+import { stopAllEmbeddedApps } from './services/embeddedAppRuntime';
+import { destroyAllEmbeddedAppViews } from './services/embeddedAppViewManager';
 
 // The main process bundle is emitted as CommonJS by vite-plugin-electron's
 // default config, so __dirname is available as-is (no import.meta.url shim
@@ -45,6 +49,10 @@ app.whenReady().then(() => {
   registerIpcHandlers(() => mainWindow);
   void startSystemMetrics();
   void refreshOpenCodeInstallState();
+  void fetchAppsCatalog(true);
+  void startCoreApiServer().catch((err) => {
+    console.error('[core-api] failed to start:', err);
+  });
   createWindow();
 
   app.on('activate', () => {
@@ -62,7 +70,10 @@ app.on('before-quit', async (event) => {
   event.preventDefault();
   stopSystemMetrics();
   destroyOpenCodeView();
+  destroyAllEmbeddedAppViews();
+  await stopAllEmbeddedApps().catch(() => {});
   await stopOpenCode().catch(() => {});
   await unloadModel().catch(() => {});
+  await stopCoreApiServer().catch(() => {});
   app.exit(0);
 });

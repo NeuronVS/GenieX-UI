@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Neuron — On-device AI apps for Snapdragon PCs</title>
+<meta name="description" content="Neuron is the home screen for on-device AI on Qualcomm Snapdragon PCs. Chat, photos, documents, and small-business tools that run locally on the Hexagon NPU. Private by default." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ff6600'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23fff'/%3E%3Cg stroke='%23fff' stroke-width='1.6'%3E%3Cpath d='M16 12V5M16 20v7M12 16H5M20 16h7'/%3E%3C/g%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f7f7f8;
+    --fg: #16171a;
+    --fg-muted: #5c616b;
+    --border: #e5e6e9;
+    --accent: #ff6600;
+    --accent-fg: #ffffff;
+    --radius: 12px;
+    --maxw: 1080px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0e11;
+      --bg-alt: #16171b;
+      --fg: #eceef1;
+      --fg-muted: #9aa0ab;
+      --border: #23252c;
+      --accent: #ff7a1a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 60px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; text-decoration: none; }
+  .brand .logo {
+    width: 26px; height: 26px; border-radius: 7px; background: var(--accent);
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .brand .logo svg { width: 16px; height: 16px; }
+  .nav-links { display: flex; align-items: center; gap: 26px; font-size: 14px; }
+  .nav-links a { color: var(--fg-muted); text-decoration: none; }
+  .nav-links a:hover { color: var(--fg); }
+  .nav-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: var(--accent-fg);
+    padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    text-decoration: none;
+  }
+  .nav-cta:hover { filter: brightness(1.05); }
+  @media (max-width: 720px) { .nav-links { display: none; } }
+
+  /* Hero */
+  .hero { padding: 96px 0 72px; text-align: center; }
+  .eyebrow {
+    display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: 0.02em;
+    color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 22px;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.08; letter-spacing: -0.02em;
+    margin: 0 0 20px; font-weight: 700;
+  }
+  .lede { font-size: clamp(1.05rem, 2vw, 1.25rem); color: var(--fg-muted); max-width: 620px; margin: 0 auto 34px; }
+  .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 22px; border-radius: 10px; font-size: 15px; font-weight: 600;
+    text-decoration: none; border: 1px solid var(--border);
+  }
+  .btn-primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn-primary:hover { filter: brightness(1.05); }
+  .btn-ghost { background: var(--bg); color: var(--fg); }
+  .btn-ghost:hover { background: var(--bg-alt); }
+  .hero-note { margin-top: 18px; font-size: 13px; color: var(--fg-muted); }
+
+  /* Sections */
+  section { padding: 64px 0; border-top: 1px solid var(--border); }
+  .section-head { max-width: 640px; margin-bottom: 40px; }
+  h2 { font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.01em; margin: 0 0 10px; }
+  .section-head p { color: var(--fg-muted); margin: 0; font-size: 1.05rem; }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 860px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; background: var(--bg);
+  }
+  .card h3 { margin: 0 0 6px; font-size: 1.05rem; }
+  .card p { margin: 0; color: var(--fg-muted); font-size: 0.95rem; }
+  .card .ic { font-size: 20px; margin-bottom: 12px; display: block; }
+
+  /* App list */
+  .apps { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 640px) { .apps { grid-template-columns: 1fr; } }
+  .app-row {
+    display: flex; gap: 14px; align-items: flex-start;
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px;
+    background: var(--bg-alt);
+  }
+  .app-row .badge { font-size: 20px; line-height: 1; flex-shrink: 0; }
+  .app-row strong { display: block; font-size: 0.98rem; }
+  .app-row span { color: var(--fg-muted); font-size: 0.9rem; }
+  .app-row .soon {
+    font-size: 11px; font-weight: 600; color: var(--fg-muted);
+    border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px; margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Download strip */
+  .download { text-align: center; background: var(--bg-alt); border-radius: 16px; padding: 48px 24px; }
+  .download h2 { margin-bottom: 8px; }
+  .download p { color: var(--fg-muted); margin: 0 auto 26px; max-width: 520px; }
+  .req { margin-top: 16px; font-size: 13px; color: var(--fg-muted); }
+
+  footer { border-top: 1px solid var(--border); padding: 40px 0 60px; color: var(--fg-muted); font-size: 14px; }
+  .foot-row { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; }
+  .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
+  .foot-links a { text-decoration: none; color: var(--fg-muted); }
+  .foot-links a:hover { color: var(--fg); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top">
+      <span class="logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="4" fill="#fff"/>
+          <g stroke="#fff" stroke-width="2" stroke-linecap="round">
+            <path d="M16 12V5M16 20v7M12 16H5M20 16h7"/>
+          </g>
+        </svg>
+      </span>
+      Neuron
+    </a>
+    <nav class="nav-links">
+      <a href="#why">Why Neuron</a>
+      <a href="#apps">Apps</a>
+      <a href="#memory">Memory</a>
+      <a href="https://github.com/NeuronVS/GenieX-UI">GitHub</a>
+    </nav>
+    <a class="nav-cta" href="#download">Download</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+
+    <section class="hero" style="border-top:none">
+      <span class="eyebrow">On-device AI for Snapdragon PCs</span>
+      <h1>Your AI apps.<br>On your PC. Private by default.</h1>
+      <p class="lede">
+        Neuron is the home screen for on-device AI — chat, photos, documents, and
+        small-business tools that run locally on Qualcomm's Hexagon NPU. No cloud
+        account required for everyday use.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="#download">Download for Windows ARM64</a>
+        <a class="btn btn-ghost" href="https://youtu.be/H0uQf1l3JHk">Watch the demo</a>
+      </div>
+      <p class="hero-note">Powered under the hood by Qualcomm GenieX for real NPU acceleration.</p>
+    </section>
+
+    <section id="why">
+      <div class="section-head">
+        <h2>Why Neuron</h2>
+        <p>Built for Snapdragon Windows devices that want serious AI without sending every file to the cloud.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <span class="ic">🔒</span>
+          <h3>Local first</h3>
+          <p>Models run on your PC. Conversations and files don't need to leave the device.</p>
+        </div>
+        <div class="card">
+          <span class="ic">⚡</span>
+          <h3>Built for Snapdragon</h3>
+          <p>Designed around Hexagon NPU performance on Windows ARM64 — not a watered-down demo.</p>
+        </div>
+        <div class="card">
+          <span class="ic">🧩</span>
+          <h3>Apps, not just a chat box</h3>
+          <p>Install the tools you need. Start with Chat, grow into photos, files, and business.</p>
+        </div>
+        <div class="card">
+          <span class="ic">🧠</span>
+          <h3>Shared memory</h3>
+          <p>Neuron remembers across apps with tags — context shared when you want it, scoped when you don't.</p>
+        </div>
+        <div class="card">
+          <span class="ic">⬇️</span>
+          <h3>One click to get models</h3>
+          <p>Pick Qualcomm-optimized or Hugging Face models; Neuron handles download and load.</p>
+        </div>
+        <div class="card">
+          <span class="ic">🖥️</span>
+          <h3>Live system status</h3>
+          <p>NPU load, memory, model-loaded state, and ARM64 status right in the sidebar.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="apps">
+      <div class="section-head">
+        <h2>Apps</h2>
+        <p>Neuron is growing into a full AI app platform for Snapdragon PCs. Install an app and Neuron can pull the right model automatically.</p>
+      </div>
+      <div class="apps">
+        <div class="app-row"><span class="badge">💬</span><div><strong>Chat</strong><span>Everyday conversation with your local model.</span></div></div>
+        <div class="app-row"><span class="badge">⌨️</span><div><strong>Code</strong><span>A local coding agent when you need it.</span></div></div>
+        <div class="app-row"><span class="badge">🎨</span><div><strong>Photo Editor <em class="soon">soon</em></strong><span>Upscale, colorize, and edit images with on-device AI.</span></div></div>
+        <div class="app-row"><span class="badge">🖼️</span><div><strong>Photos <em class="soon">soon</em></strong><span>Auto-organize, tag people, and open shots in the editor.</span></div></div>
+        <div class="app-row"><span class="badge">📄</span><div><strong>File Organizer <em class="soon">soon</em></strong><span>Understand docs and PDFs; sort and find what matters.</span></div></div>
+        <div class="app-row"><span class="badge">📊</span><div><strong>Small Business <em class="soon">soon</em></strong><span>Guided setup for your state — questions, plans, next steps.</span></div></div>
+        <div class="app-row"><span class="badge">🌐</span><div><strong>Website Builder <em class="soon">soon</em></strong><span>Build a small site in-app; publish and hosting later.</span></div></div>
+        <div class="app-row"><span class="badge">➕</span><div><strong>Marketplace</strong><span>Install Neuron apps; they appear in your left menu.</span></div></div>
+      </div>
+    </section>
+
+    <section id="memory">
+      <div class="section-head">
+        <h2>Neuron Memory</h2>
+        <p>A shared, private memory layer for the whole product — lasting context, not a one-off chat history.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>Tagged per app</h3>
+          <p>Each app keeps its own memories, so Photos and Chat stay separate until you connect them.</p>
+        </div>
+        <div class="card">
+          <h3>Search everything</h3>
+          <p>Look across all of it when you want the full picture.</p>
+        </div>
+        <div class="card">
+          <h3>Stored locally</h3>
+          <p>Keyword and tag search first, with smarter semantic recall on the NPU later.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="download">
+      <div class="download">
+        <h2>Get Neuron</h2>
+        <p>Download the installer → Next → Install → launch Neuron. On first run, tap
+          <strong>Install GenieX CLI</strong> if prompted so your NPU runtime is ready.</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="https://github.com/NeuronVS/GenieX-UI/releases/latest/download/Neuron-Setup-arm64.exe">Download Windows ARM64</a>
+          <a class="btn btn-ghost" href="https://github.com/NeuronVS/GenieX-UI/releases/latest">All releases</a>
+        </div>
+        <p class="req">Requires a Qualcomm Snapdragon Windows PC (X Elite / X2 Elite and friends).</p>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot-row">
+    <span>© <span id="year">2026</span> NeuronVS · Built for on-device AI</span>
+    <span class="foot-links">
+      <a href="https://github.com/NeuronVS/GenieX-UI">GitHub</a>
+      <a href="https://youtu.be/H0uQf1l3JHk">Demo</a>
+      <a href="https://aihub.qualcomm.com/geniex">GenieX</a>
+    </span>
+  </div>
+</footer>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+</body>
+</html>

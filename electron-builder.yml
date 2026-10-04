@@ -1,5 +1,5 @@
-appId: com.qualcomm.geniex.modelmanager
-productName: GenieX Model Manager
+appId: com.neuronvs.neuron
+productName: Neuron
 copyright: Copyright © 2026
 directories:
   output: release
@@ -7,14 +7,17 @@ files:
   - dist/**/*
   - dist-electron/**/*
   - package.json
+  - catalog/**/*
+  - media/**/*
 win:
+  icon: media/code.ico
   target:
     - target: nsis
       arch:
         - arm64
   # Stable name so README can always link:
-  # …/releases/latest/download/GenieX-Model-Manager-Setup-arm64.exe
-  artifactName: GenieX-Model-Manager-Setup-arm64.${ext}
+  # …/releases/latest/download/Neuron-Setup-arm64.exe
+  artifactName: Neuron-Setup-arm64.${ext}
 nsis:
   oneClick: false
   perMachine: false
@@ -22,7 +25,7 @@ nsis:
   allowElevation: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: GenieX Model Manager
+  shortcutName: Neuron
   installerLanguages:
     - en_US
   displayLanguageSelector: false

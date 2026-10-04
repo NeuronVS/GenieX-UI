@@ -5,6 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "types": ["node"],
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
     "outDir": ".tsc-out",
@@ -13,5 +14,5 @@
       "@shared/*": ["shared/*"]
     }
   },
-  "include": ["electron", "shared", "vite.config.ts"]
+  "include": ["electron", "shared", "vite.config.mts"]
 }

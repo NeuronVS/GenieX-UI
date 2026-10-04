@@ -85,8 +85,16 @@ export async function getGeniexVersion(): Promise<GeniexVersionInfo | null> {
 // ANSI / text helpers
 // ---------------------------------------------------------------------------
 
+// CSI sequences per ECMA-48: ESC [ + parameter bytes (0x30-0x3F, i.e. digits
+// AND the `?`/`<`/`=`/`>` private-mode prefixes) + intermediate bytes
+// (0x20-0x2F) + a final byte (0x40-0x7E). The narrower `[0-9;]*[a-zA-Z]`
+// version this replaced didn't match private-mode toggles like `\x1b[?2004l`
+// (bracketed paste) or `\x1b[?25h` (cursor show) — those leaked through
+// verbatim and corrupted captured CLI error text (confirmed empirically: a
+// real pull failure surfaced as "[?2004l[?25h...Error: SDKError(...)" in
+// the UI instead of a clean message).
 // eslint-disable-next-line no-control-regex
-const ANSI_RE = /\x1b\[[0-9;]*[a-zA-Z]|\x1b\][^\x07]*\x07|[\x00-\x08\x0e-\x1f]/g;
+const ANSI_RE = /\x1b\[[0-?]*[ -/]*[@-~]|\x1b\][^\x07]*\x07|[\x00-\x08\x0e-\x1f]/g;
 
 function stripAnsi(text: string): string {
   return text.replace(ANSI_RE, '');
@@ -106,6 +114,33 @@ function baseEnv(hfToken: string | undefined): NodeJS.ProcessEnv {
 // geniex list --format json
 // ---------------------------------------------------------------------------
 
+/**
+ * geniex sometimes prints extra text to stdout ahead of the JSON payload —
+ * e.g. a colored "A new version of geniex is available" update banner
+ * (`\x1b[33m...`) — so stdout isn't guaranteed to be pure JSON. Slice out
+ * just the outermost `[...]`/`{...}` rather than assuming the whole string
+ * parses.
+ */
+function extractJsonPayload(raw: string): string {
+  const start = raw.search(/[[{]/);
+  if (start === -1) return raw;
+  const end = raw[start] === '[' ? raw.lastIndexOf(']') : raw.lastIndexOf('}');
+  if (end === -1 || end < start) return raw;
+  return raw.slice(start, end + 1);
+}
+
+function parseJsonOutput<T>(raw: string, context: string): T {
+  const payload = extractJsonPayload(raw.trim());
+  try {
+    return JSON.parse(payload) as T;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `Failed to parse ${context} output as JSON: ${message}\nRaw output: ${raw.trim().slice(0, 300)}`,
+    );
+  }
+}
+
 export async function listCachedModels(dataDir: string): Promise<CachedModel[]> {
   const bin = await findGeniexPath();
   if (!bin) throw new Error('geniex CLI not found');
@@ -116,7 +151,7 @@ export async function listCachedModels(dataDir: string): Promise<CachedModel[]> 
   );
   const trimmed = stdout.trim();
   if (!trimmed) return [];
-  return JSON.parse(trimmed) as CachedModel[];
+  return parseJsonOutput<CachedModel[]>(trimmed, 'geniex list --format json');
 }
 
 export async function removeCachedModel(dataDir: string, name: string): Promise<void> {

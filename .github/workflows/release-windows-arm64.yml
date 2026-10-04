@@ -4,8 +4,8 @@
 # Manual runs → Actions Artifacts only
 # Tag runs    → GitHub Release + downloadable installer
 #
-# README download link stays valid forever via:
-#   https://github.com/<owner>/<repo>/releases/latest/download/GenieX-Model-Manager-Setup-arm64.exe
+# README download link:
+#   https://github.com/<owner>/<repo>/releases/latest/download/Neuron-Setup-arm64.exe
 
 name: Release Windows ARM64
 
@@ -43,15 +43,15 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: geniex-model-manager-windows-arm64
-          path: release/GenieX-Model-Manager-Setup-arm64.exe
+          name: neuron-windows-arm64
+          path: release/Neuron-Setup-arm64.exe
           if-no-files-found: error
 
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: release/GenieX-Model-Manager-Setup-arm64.exe
+          files: release/Neuron-Setup-arm64.exe
           generate_release_notes: true
           fail_on_unmatched_files: true
         env:

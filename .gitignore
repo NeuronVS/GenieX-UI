@@ -6,3 +6,4 @@ release/
 *.tsbuildinfo
 *.log
 .DS_Store
+scratch/

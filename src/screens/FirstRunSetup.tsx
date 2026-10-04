@@ -24,10 +24,9 @@ export function FirstRunSetup({ onReady }: { onReady: () => void }) {
         padding: 24,
       }}
     >
-      <div style={{ fontSize: 40 }}>⚡</div>
-      <h1 style={{ margin: 0 }}>GenieX Model Manager</h1>
+      <h1 style={{ margin: 0 }}>Welcome to Neuron</h1>
       <p style={{ color: 'var(--text-secondary)', maxWidth: 420 }}>
-        This app needs the GenieX CLI to browse, download, and run models on your Snapdragon
+        Neuron needs the GenieX CLI to browse, download, and run models on your Snapdragon
         device's Hexagon NPU.
       </p>
 

@@ -1,15 +1,26 @@
+import { useEffect, useState } from 'react';
+import type { ActiveModelState } from '@shared/types';
 import { useSystemMetrics } from '../hooks/useSystemMetrics';
 import { formatBytes } from '../lib/format';
 import { UsageChart } from './UsageChart';
 
-export function SystemMetricsPanel() {
+export function SystemMetricsPanel({ activeModel }: { activeModel: ActiveModelState }) {
   const snap = useSystemMetrics();
+  const [arch, setArch] = useState('arm64');
+
+  useEffect(() => {
+    window.geniex.system.getArch().then((a) => {
+      setArch(a === 'arm64' ? 'ARM64' : a.toUpperCase());
+    });
+  }, []);
+
   if (!snap) return null;
 
   const npuLabel = snap.npu.available
     ? `${(snap.npu.percent ?? 0).toFixed(0)}%`
     : 'N/A';
   const ramLabel = `${formatBytes(snap.ram.usedBytes)} / ${formatBytes(snap.ram.totalBytes)}`;
+  const modelLoaded = activeModel.status === 'loaded' && !!activeModel.modelName;
 
   return (
     <div className="metrics-panel">
@@ -45,6 +56,28 @@ export function SystemMetricsPanel() {
           color="var(--ram-line)"
           fill="var(--ram-fill)"
         />
+      </div>
+
+      <div className="sidebar-status">
+        <div className={`sidebar-status-model${modelLoaded ? ' loaded' : ''}`}>
+          <span className={`status-dot ${activeModel.status}`} />
+          <span>
+            {modelLoaded
+              ? `Model loaded | ${activeModel.modelName}`
+              : activeModel.status === 'starting'
+                ? 'Loading model…'
+                : 'No model loaded'}
+          </span>
+        </div>
+        <div className="sidebar-status-caps">
+          {snap.npu.available ? (
+            <span className="npu-on">NPU Enabled</span>
+          ) : (
+            <span>NPU unavailable</span>
+          )}
+          <span className="sep">|</span>
+          <span>{arch}</span>
+        </div>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 **Your AI apps. On your Snapdragon PC. Private by default.**
 
-Neuron is becoming the home screen for on-device AI — chat, photos, documents, and small-business tools that run locally on Qualcomm’s Hexagon NPU. No cloud account required for everyday use. Your models and your memory stay on the machine.
+Neuron is the home screen for on-device AI — chat, photos, documents, and small-business tools that run locally on Qualcomm’s Hexagon NPU. No cloud account required for everyday use. Your models and your memory stay on the machine.
 
 Powered under the hood by [Qualcomm GenieX](https://aihub.qualcomm.com/geniex) so Snapdragon Windows devices get real NPU acceleration, not a watered-down demo.
 
@@ -20,42 +20,36 @@ Powered under the hood by [Qualcomm GenieX](https://aihub.qualcomm.com/geniex) s
 
 ## See it in action
 
-[![Watch the demo](https://img.youtube.com/vi/H0uQf1l3JHk/maxresdefault.jpg)](https://www.youtube.com/watch?v=66Llan1dmU0)
+[![Watch the demo](https://img.youtube.com/vi/H0uQf1l3JHk/maxresdefault.jpg)](https://youtu.be/H0uQf1l3JHk)
 
 ---
 
 ## Download (Windows ARM64)
 
-[![Download Windows ARM64](https://img.shields.io/github/v/release/NeuronVS/GenieX-UI?label=Download%20Windows%20ARM64&style=for-the-badge)](https://github.com/NeuronVS/GenieX-UI/releases/latest/download/GenieX-Model-Manager-Setup-arm64.exe)
+[![Download Windows ARM64](https://img.shields.io/github/v/release/NeuronVS/GenieX-UI?label=Download%20Windows%20ARM64&style=for-the-badge)](https://github.com/NeuronVS/GenieX-UI/releases/latest/download/Neuron-Setup-arm64.exe)
 
 Or open the [latest release](https://github.com/NeuronVS/GenieX-UI/releases/latest) page.
 
-**Get started in minutes:** download the installer → Next → Install → launch the app. On first run, tap **Install GenieX CLI** if prompted so your NPU runtime is ready.
+**Get started in minutes:** download the installer → Next → Install → launch **Neuron**. On first run, tap **Install GenieX CLI** if prompted so your NPU runtime is ready.
 
-> Current release still shows as **GenieX Model Manager** in places while we finish the Neuron rebrand. Same product — new name coming.
+> Older releases may still be named GenieX Model Manager. New builds ship as **Neuron**.
 
 ---
 
 ## What you can do today
 
-- Browse and download models from **Qualcomm AI Hub** and **Hugging Face**
-- Keep a personal model library — load and unload with one click
-- **Chat** with a local model (OpenAI-compatible endpoint for tools you already love)
-- Optional **Code** assistant via OpenCode, pointed at your local model
-- Live **NPU** and **memory** insight in the sidebar so you always know what’s running
+- **Chat** out of the box — talk to a local model once it’s loaded
+- **My Models** — Local, Qualcomm, Optimized (soon), Hugging Face, and Import in one place
+- **Marketplace** — install Neuron apps; they appear in your left menu
+- Live **NPU**, **memory**, model-loaded status, and **ARM64** in the sidebar
+- Optional **Code** app (OpenCode) from the Marketplace
+- Shared **Neuron Memory** API ready for apps (local, tagged by app)
 
 ---
 
 ## What’s next
 
-Neuron is growing from a model manager into an **AI app platform** for Snapdragon PCs.
-
-### A cleaner home for AI
-
-- Full **Neuron** branding throughout the app
-- Left menu shows **your installed apps** — Chat ready out of the box
-- **Marketplace** for apps (install what you need)
-- **My Models** as one place for Local, Qualcomm, Optimized, Hugging Face, and Import
+Neuron is growing into a full **AI app platform** for Snapdragon PCs.
 
 ### Apps we’re building toward
 
@@ -73,15 +67,16 @@ Install an app and Neuron can **pull the right model automatically** if it isn�
 
 ### Neuron Memory
 
-A shared, private memory layer for the whole product — think lasting context, not a one-off chat history.
+A shared, private memory layer for the whole product — lasting context, not a one-off chat history.
 
 - Each app keeps its own tagged memories
-- You can still search across everything when you want the full picture
+- Search across everything when you want the full picture
 - Stored **locally**; keyword and tag search first, smarter semantic recall on the NPU later
 
 ### And more
 
 - Richer **Optimized** model picks for Snapdragon
+- Live catalog from [NeuronVS/neuron-apps](https://github.com/NeuronVS/neuron-apps) (`apps.json`)
 - One-click **publish & hosting** for sites you build in Neuron
 - Small Business help that grows into taxes and day-to-day operations
 

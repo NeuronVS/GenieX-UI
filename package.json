@@ -2,7 +2,7 @@
   "name": "geniex-model-manager",
   "private": true,
   "version": "0.1.0",
-  "description": "Desktop UI for browsing, downloading, importing, and loading GenieX models on Qualcomm Snapdragon devices.",
+  "description": "Neuron — local AI apps for Qualcomm Snapdragon PCs, powered by GenieX.",
   "main": "dist-electron/main.js",
   "author": "",
   "license": "UNLICENSED",
@@ -13,13 +13,20 @@
     "package": "npm run build && electron-builder"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "check-disk-space": "^3.4.0",
     "electron-store": "^8.2.0",
+    "mammoth": "^1.12.1",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^6.2.108",
+    "preline": "^4.2.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

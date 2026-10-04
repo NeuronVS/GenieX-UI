@@ -1,0 +1,87 @@
+import type { AppsCatalog } from '@shared/types';
+
+/** Bundled fallback when the remote NeuronVS/neuron-apps catalog is unreachable. */
+export const DEFAULT_APPS_CATALOG: AppsCatalog = {
+  apps: [
+    {
+      id: 'chat',
+      name: 'Chat',
+      description: 'Chat with a loaded local model',
+      icon: '💬',
+      version: '1.0.0',
+      builtin: true,
+      requiredModels: [],
+      entry: 'builtin:chat',
+      memoryTags: ['chat'],
+    },
+    {
+      id: 'code',
+      name: 'Code',
+      description: 'Local coding agent powered by OpenCode and your GenieX model',
+      icon: '⌨️',
+      version: '1.0.0',
+      builtin: true,
+      requiredModels: [],
+      entry: 'builtin:code',
+      memoryTags: ['code'],
+    },
+    {
+      id: 'photo-editor',
+      name: 'Photo Editor',
+      description: 'Local LLM image edit, upscale, and colorize',
+      icon: '🖼️',
+      version: '0.1.0',
+      builtin: false,
+      requiredModels: [],
+      entry: 'placeholder',
+      memoryTags: ['photos', 'edit'],
+    },
+    {
+      id: 'photos',
+      name: 'Photos',
+      description: 'Characterize images, organize folders, and tag people',
+      icon: '📷',
+      version: '0.1.0',
+      builtin: false,
+      requiredModels: [],
+      entry: 'placeholder',
+      memoryTags: ['photos'],
+    },
+    {
+      id: 'file-organizer',
+      name: 'File Manager',
+      description: 'Browse, organize, and open your files',
+      icon: '🗂️',
+      version: '0.1.0',
+      builtin: true,
+      requiredModels: ['qualcomm/Qwen3-4B-Instruct-2507'],
+      entry: 'builtin:file-organizer',
+      memoryTags: ['files'],
+    },
+    {
+      id: 'small-business',
+      name: 'Small Business',
+      description: 'State-aware guided setup to start a small business',
+      icon: '🏪',
+      version: '0.1.0',
+      builtin: false,
+      requiredModels: [],
+      entry: 'placeholder',
+      memoryTags: ['business'],
+    },
+    {
+      id: 'website-builder',
+      name: 'Website Builder',
+      description: 'Build and edit a small website in-app; publish later',
+      icon: '🌐',
+      version: '0.1.0',
+      builtin: false,
+      requiredModels: [],
+      entry: 'placeholder',
+      memoryTags: ['web'],
+    },
+  ],
+};
+
+export const REMOTE_APPS_CATALOG_URL =
+  'https://raw.githubusercontent.com/NeuronVS/neuron-apps/main/apps.json';

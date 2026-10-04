@@ -47,7 +47,7 @@ export function Settings() {
         <section className="card" style={{ padding: 20, gap: 14 }}>
           <div style={{ fontWeight: 600 }}>OpenCode project folder</div>
           <p style={{ color: 'var(--text-tertiary)', fontSize: 12, margin: 0 }}>
-            Workspace the OpenCode agent can read and edit when you use the Code screen.
+            Workspace the OpenCode agent can read and edit when you use the Code app.
           </p>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <button className="btn" onClick={pickAndSetProjectDir}>

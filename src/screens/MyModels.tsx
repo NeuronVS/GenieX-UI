@@ -4,8 +4,57 @@ import { useActiveModel } from '../hooks/useActiveModel';
 import { ModelCard } from '../components/ModelCard';
 import { ConnectEndpointPanel } from '../components/ConnectEndpointPanel';
 import { formatBytes } from '../lib/format';
+import {
+  QualcommCatalog,
+  OptimizedCatalog,
+  HuggingFaceLookup,
+  ImportModelPanel,
+} from './modelCatalogPanels';
+
+type Tab = 'local' | 'qualcomm' | 'optimized' | 'huggingface' | 'import';
+
+const TABS: Array<{ id: Tab; label: string }> = [
+  { id: 'local', label: 'Local Models' },
+  { id: 'qualcomm', label: 'Qualcomm' },
+  { id: 'optimized', label: 'Optimized' },
+  { id: 'huggingface', label: 'Hugging Face' },
+  { id: 'import', label: 'Import Model' },
+];
 
 export function MyModels() {
+  const [tab, setTab] = useState<Tab>('local');
+
+  return (
+    <div>
+      <div className="page-header">
+        <div>
+          <h1>My Models</h1>
+          <p>Local cache, Qualcomm AI Hub, Hugging Face, and imports — in one place.</p>
+        </div>
+      </div>
+
+      <div className="toolbar" style={{ marginBottom: 20, flexWrap: 'wrap' }}>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            className={`btn${tab === t.id ? ' btn-primary' : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'local' && <LocalModelsPanel />}
+      {tab === 'qualcomm' && <QualcommCatalog />}
+      {tab === 'optimized' && <OptimizedCatalog />}
+      {tab === 'huggingface' && <HuggingFaceLookup />}
+      {tab === 'import' && <ImportModelPanel />}
+    </div>
+  );
+}
+
+function LocalModelsPanel() {
   const { models, loading, error, refresh, remove } = useCachedModels();
   const { state: active, load, unload } = useActiveModel();
   const [busyName, setBusyName] = useState<string | null>(null);
@@ -30,6 +79,7 @@ export function MyModels() {
   };
 
   const handleRemove = async (name: string) => {
+    if (!window.confirm(`Delete "${name}"? This frees its disk space but cannot be undone.`)) return;
     if (active.modelName === name && active.status !== 'idle') {
       await unload();
     }
@@ -38,11 +88,7 @@ export function MyModels() {
 
   return (
     <div>
-      <div className="page-header">
-        <div>
-          <h1>My Models</h1>
-          <p>Models downloaded to your local GenieX cache.</p>
-        </div>
+      <div className="toolbar" style={{ marginBottom: 16, justifyContent: 'flex-end' }}>
         <button className="btn" onClick={refresh}>
           Refresh
         </button>
@@ -74,13 +120,16 @@ export function MyModels() {
         <div className="empty-state">Loading…</div>
       ) : models.length === 0 ? (
         <div className="empty-state">
-          No models downloaded yet. Head to the Marketplace or Import Local to add one.
+          No models downloaded yet. Use the Qualcomm, Hugging Face, or Import Model tabs to add
+          one.
         </div>
       ) : (
         <div className="card-grid">
           {models.map((m) => {
             const isActive = active.modelName === m.name;
-            const isBusy = busyName === m.name || (isActive && (active.status === 'starting' || active.status === 'stopping'));
+            const isBusy =
+              busyName === m.name ||
+              (isActive && (active.status === 'starting' || active.status === 'stopping'));
             return (
               <ModelCard
                 key={m.name}
@@ -89,16 +138,20 @@ export function MyModels() {
                   <>
                     <span className="badge badge-type">{m.type}</span>
                     <span className="badge">{m.runtime}</span>
-                    {isActive && active.status === 'loaded' && <span className="badge badge-loaded">● loaded</span>}
+                    {isActive && active.status === 'loaded' && (
+                      <span className="badge badge-loaded">● loaded</span>
+                    )}
                   </>
                 }
                 meta={
                   <>
-                    {m.precisions.filter((p) => p !== 'N/A').map((p) => (
-                      <span key={p} className="badge badge-precision">
-                        {p}
-                      </span>
-                    ))}
+                    {m.precisions
+                      .filter((p) => p !== 'N/A')
+                      .map((p) => (
+                        <span key={p} className="badge badge-precision">
+                          {p}
+                        </span>
+                      ))}
                     <span>{formatBytes(m.size)}</span>
                   </>
                 }
@@ -109,11 +162,19 @@ export function MyModels() {
                         {isBusy ? 'Unloading…' : 'Unload'}
                       </button>
                     ) : (
-                      <button className="btn btn-primary btn-sm" onClick={() => handleLoad(m.name)} disabled={isBusy}>
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleLoad(m.name)}
+                        disabled={isBusy}
+                      >
                         {isBusy ? 'Loading…' : 'Load'}
                       </button>
                     )}
-                    <button className="btn btn-sm btn-danger" onClick={() => handleRemove(m.name)} disabled={isBusy}>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleRemove(m.name)}
+                      disabled={isBusy}
+                    >
                       Delete
                     </button>
                   </>

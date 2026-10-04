@@ -22,6 +22,7 @@ import {
   GENIEX_SERVE_HOST,
   GENIEX_SERVE_PORT,
   type ActiveModelState,
+  type ChatCompletionStats,
   type ChatMessage,
 } from '@shared/types';
 import { syncOpenCodeModel } from './opencodeConfig';
@@ -151,6 +152,124 @@ export async function unloadModel(): Promise<ActiveModelState> {
 
 /** Chat completions from the main process — avoids renderer CORS against geniex serve. */
 export async function chatCompletions(messages: ChatMessage[]): Promise<string> {
+  const { content } = await chatCompletionsStream(messages);
+  return content;
+}
+
+type StreamJson = {
+  choices?: Array<{
+    delta?: { content?: string | null; reasoning_content?: string | null };
+    message?: { content?: string | null; reasoning_content?: string | null };
+  }>;
+  usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+  timings?: {
+    predicted_n?: number;
+    predicted_per_second?: number;
+    prompt_n?: number;
+  };
+};
+
+/**
+ * Normalize GenieX/llama.cpp deltas into a single text stream the UI can split:
+ * reasoning_content → wrapped in <think>…</think>, then content as the answer.
+ */
+function extractStreamPieces(
+  json: StreamJson,
+  gate: { reasoningOpen: boolean },
+): string {
+  const choice = json.choices?.[0];
+  const delta = choice?.delta;
+  const message = choice?.message;
+  const reasoning =
+    (typeof delta?.reasoning_content === 'string' ? delta.reasoning_content : '') ||
+    (typeof message?.reasoning_content === 'string' ? message.reasoning_content : '');
+  const content =
+    (typeof delta?.content === 'string' ? delta.content : '') ||
+    (typeof message?.content === 'string' ? message.content : '');
+
+  let out = '';
+  if (reasoning) {
+    if (!gate.reasoningOpen) {
+      out += '<think>';
+      gate.reasoningOpen = true;
+    }
+    out += reasoning;
+  }
+  if (content) {
+    if (gate.reasoningOpen) {
+      out += '</think>\n';
+      gate.reasoningOpen = false;
+    }
+    out += content;
+  }
+  return out;
+}
+
+function applyUsage(
+  json: StreamJson,
+  state: {
+    promptTokens: number | null;
+    completionTokens: number | null;
+    serverTokensPerSecond: number | null;
+  },
+): void {
+  if (json.usage) {
+    if (typeof json.usage.prompt_tokens === 'number') state.promptTokens = json.usage.prompt_tokens;
+    if (typeof json.usage.completion_tokens === 'number') {
+      state.completionTokens = json.usage.completion_tokens;
+    }
+  }
+  if (json.timings) {
+    if (typeof json.timings.predicted_per_second === 'number') {
+      state.serverTokensPerSecond = json.timings.predicted_per_second;
+    }
+    if (typeof json.timings.predicted_n === 'number' && state.completionTokens === null) {
+      state.completionTokens = json.timings.predicted_n;
+    }
+    if (typeof json.timings.prompt_n === 'number' && state.promptTokens === null) {
+      state.promptTokens = json.timings.prompt_n;
+    }
+  }
+}
+
+function buildStats(
+  content: string,
+  startedAt: number,
+  firstTokenAt: number | null,
+  meta: {
+    promptTokens: number | null;
+    completionTokens: number | null;
+    serverTokensPerSecond: number | null;
+  },
+): ChatCompletionStats {
+  const endedAt = Date.now();
+  const elapsedMs = Math.max(1, endedAt - (firstTokenAt ?? startedAt));
+  let estimated = false;
+  let completionTokens = meta.completionTokens;
+  if (completionTokens === null) {
+    // ponytail: ~4 chars/token when the server omits usage — good enough for UI
+    completionTokens = Math.max(1, Math.round(content.length / 4));
+    estimated = true;
+  }
+  const tokensPerSecond =
+    meta.serverTokensPerSecond ?? completionTokens / (elapsedMs / 1000);
+  return {
+    elapsedMs,
+    completionTokens,
+    promptTokens: meta.promptTokens,
+    tokensPerSecond,
+    estimated,
+  };
+}
+
+/**
+ * Stream chat completions (OpenAI SSE). Calls `onChunk` for each text delta.
+ * Returns final content + tokens/s style stats for the composer footer.
+ */
+export async function chatCompletionsStream(
+  messages: ChatMessage[],
+  onChunk?: (text: string) => void,
+): Promise<{ content: string; stats: ChatCompletionStats }> {
   if (state.status !== 'loaded' || !state.modelName) {
     throw new Error('No model loaded. Load one in My Models first.');
   }
@@ -158,11 +277,11 @@ export async function chatCompletions(messages: ChatMessage[]): Promise<string> 
 
   const res = await fetch(`${GENIEX_OPENAI_BASE_URL}/chat/completions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
     body: JSON.stringify({
       model: state.modelName,
       messages,
-      stream: false,
+      stream: true,
     }),
     signal: AbortSignal.timeout(300_000),
   });
@@ -170,8 +289,105 @@ export async function chatCompletions(messages: ChatMessage[]): Promise<string> 
     const body = await res.text().catch(() => '');
     throw new Error(`Chat failed: HTTP ${res.status}${body ? ` ${body.slice(0, 240)}` : ''}`.trim());
   }
-  const data = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
+  if (!res.body) {
+    throw new Error('Chat failed: empty response body (streaming unsupported?)');
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let content = '';
+  let firstTokenAt: number | null = null;
+  const startedAt = Date.now();
+  const meta = {
+    promptTokens: null as number | null,
+    completionTokens: null as number | null,
+    serverTokensPerSecond: null as number | null,
   };
-  return data.choices?.[0]?.message?.content?.trim() || '(empty reply)';
+  let sawSseData = false;
+  const gate = { reasoningOpen: false };
+
+  const appendText = (piece: string) => {
+    if (!piece) return;
+    if (firstTokenAt === null) firstTokenAt = Date.now();
+    content += piece;
+    onChunk?.(piece);
+  };
+
+  const consumeDataLine = (data: string) => {
+    if (!data || data === '[DONE]') {
+      if (data === '[DONE]' && gate.reasoningOpen) {
+        appendText('</think>\n');
+        gate.reasoningOpen = false;
+      }
+      return;
+    }
+    let json: StreamJson;
+    try {
+      json = JSON.parse(data);
+    } catch {
+      return;
+    }
+    sawSseData = true;
+    appendText(extractStreamPieces(json, gate));
+    applyUsage(json, meta);
+  };
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split(/\r?\n/);
+    buffer = lines.pop() ?? '';
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data:')) continue;
+      consumeDataLine(trimmed.slice(5).trim());
+    }
+  }
+  const tail = buffer.trim();
+  if (tail.startsWith('data:')) {
+    consumeDataLine(tail.slice(5).trim());
+  } else if (!sawSseData && tail.startsWith('{')) {
+    try {
+      const json = JSON.parse(tail) as StreamJson;
+      appendText(extractStreamPieces(json, gate));
+      applyUsage(json, meta);
+    } catch {
+      // ignore
+    }
+  }
+  if (gate.reasoningOpen) {
+    appendText('</think>\n');
+    gate.reasoningOpen = false;
+  }
+
+  // ponytail: if stream produced nothing, fall back to non-stream once
+  if (!content.trim()) {
+    const fallback = await fetch(`${GENIEX_OPENAI_BASE_URL}/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: state.modelName,
+        messages,
+        stream: false,
+      }),
+      signal: AbortSignal.timeout(300_000),
+    });
+    if (fallback.ok) {
+      const json = (await fallback.json()) as StreamJson;
+      const fbGate = { reasoningOpen: false };
+      const text = extractStreamPieces(json, fbGate);
+      if (text) {
+        appendText(fbGate.reasoningOpen ? `${text}</think>\n` : text);
+        applyUsage(json, meta);
+      }
+    }
+  }
+
+  const trimmed = content.trim() || '(empty reply)';
+  return {
+    content: trimmed,
+    stats: buildStats(trimmed === '(empty reply)' ? '' : trimmed, startedAt, firstTokenAt, meta),
+  };
 }
